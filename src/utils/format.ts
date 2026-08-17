@@ -112,3 +112,5 @@ export function riskLabel(score: number): string {
 export function classNames(...classes: (string | false | undefined | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
+
+export const cn = classNames;

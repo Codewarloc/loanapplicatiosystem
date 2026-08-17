@@ -75,3 +75,5 @@ export default function ProgressRing({
     </div>
   );
 }
+
+export { ProgressRing };

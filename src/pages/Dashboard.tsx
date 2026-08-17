@@ -7,6 +7,7 @@ import {
   XCircle,
   Clock,
   Gauge,
+  Home,
   Wallet,
   Percent,
   PlusCircle,
@@ -60,6 +61,13 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="mb-2 flex items-center justify-between">
+        <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 hover:text-white">
+          <Home className="h-4 w-4" />
+          Back to homepage
+        </Link>
+      </div>
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>

@@ -99,7 +99,7 @@ export interface AIAnalysisResult {
     repaymentCapacity: number;
     debtBurden: number;
   };
-  riskFactors: RiskFactor[];
+  riskFactorDetails?: RiskFactor[];
 }
 
 export interface AIProcessingStage {

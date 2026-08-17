@@ -72,6 +72,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/login" className="hidden text-sm font-medium text-slate-300 hover:text-white sm:block">Sign In</Link>
+            <Link to="/signup" className="hidden text-sm font-medium text-slate-300 hover:text-white sm:block">Create Account</Link>
             <Link to="/dashboard" className="btn-primary text-sm">Get Started <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
@@ -102,8 +103,8 @@ export default function Landing() {
                 <Link to="/apply" className="btn-primary">
                   Start New Application <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link to="/dashboard" className="btn-ghost">
-                  <BarChart3 className="h-4 w-4" /> View Dashboard
+                <Link to="/signup" className="btn-ghost">
+                  <BarChart3 className="h-4 w-4" /> Create Account
                 </Link>
               </div>
               <div className="mt-10 flex items-center gap-6 text-sm text-slate-500">

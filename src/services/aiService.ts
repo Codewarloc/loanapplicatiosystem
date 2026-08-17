@@ -110,9 +110,9 @@ export async function getFullAnalysis(
     recommendedTerm: base.recommended_term,
     explanation: base.explanation,
     positiveFactors,
-    riskFactors,
+    riskFactors: riskFactors,
     breakdown,
-    riskFactors: riskFactorList,
+    riskFactorDetails: riskFactorList,
   };
 }
 

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
+import { Brain, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, TrendingUp, Zap, Home } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 
 export default function Login() {
@@ -22,6 +22,13 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-ink-950 lg:grid lg:grid-cols-2">
+      <div className="absolute left-6 top-6 z-20">
+        <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 hover:text-white">
+          <Home className="h-4 w-4" />
+          Homepage
+        </Link>
+      </div>
+
       {/* Left visual */}
       <div className="relative hidden overflow-hidden border-r border-white/[0.06] lg:flex lg:flex-col lg:justify-center lg:p-12">
         <div className="absolute inset-0 bg-grid-pattern bg-[size:40px_40px] opacity-20" />
@@ -132,7 +139,7 @@ export default function Login() {
             </form>
             <p className="mt-6 text-center text-sm text-slate-400">
               Don't have an account?{' '}
-              <Link to="/apply" className="font-medium text-brand-400 hover:text-brand-300">Get started</Link>
+              <Link to="/signup" className="font-medium text-brand-400 hover:text-brand-300">Create account</Link>
             </p>
           </div>
           <p className="mt-6 text-center text-xs text-slate-600">

@@ -1141,7 +1141,6 @@ export function getAIAnalysisResult(applicationId: string): AIAnalysisResult {
       positiveFactors: [],
       riskFactors: [],
       breakdown: { financialHealth: 0, creditProfile: 0, repaymentCapacity: 0, debtBurden: 0 },
-      riskFactors: [],
     };
   }
   const applicant = applicants.find((a) => a.id === app.applicantId);
@@ -1186,8 +1185,7 @@ export function getAIAnalysisResult(applicationId: string): AIAnalysisResult {
     recommendedTerm: app.loanTermMonths,
     explanation: app.explanation,
     positiveFactors: positive,
-    riskFactors: risk,
-    breakdown,
     riskFactors: riskFactorList,
+    breakdown,
   };
 }
