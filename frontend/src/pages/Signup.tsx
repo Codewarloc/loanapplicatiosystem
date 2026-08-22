@@ -3,21 +3,29 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, Mail, Lock, User, ArrowRight, Home, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
+import { signup } from '@/services/authService';
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await signup(fullName, email, password);
       addToast({ type: 'success', title: 'Account created!', message: 'Your profile is ready.' });
       navigate('/dashboard');
-    }, 1200);
+    } catch (error) {
+      addToast({ type: 'error', title: 'Sign up failed', message: error instanceof Error ? error.message : 'Please try again.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,7 +89,7 @@ export default function Signup() {
                 <label className="mb-1.5 block text-xs font-medium text-slate-300">Full name</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                  <input type="text" required defaultValue="Adaeze Okeke" className="input-base pl-10" placeholder="Jane Doe" />
+                  <input type="text" required value={fullName} onChange={(event) => setFullName(event.target.value)} className="input-base pl-10" placeholder="Jane Doe" />
                 </div>
               </div>
 
@@ -89,7 +97,7 @@ export default function Signup() {
                 <label className="mb-1.5 block text-xs font-medium text-slate-300">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                  <input type="email" required defaultValue="adaeze.okeke@lendai.com" className="input-base pl-10" placeholder="you@company.com" />
+                  <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="input-base pl-10" placeholder="you@company.com" />
                 </div>
               </div>
 
@@ -100,7 +108,8 @@ export default function Signup() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    defaultValue="password123"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
                     className="input-base pl-10 pr-10"
                     placeholder="••••••••"
                   />

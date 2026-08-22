@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileText,
+  History as HistoryIcon,
   PlusCircle,
   ShieldCheck,
   BarChart3,
@@ -14,7 +15,7 @@ import { cn } from '@/utils/format';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/applications', label: 'Applications', icon: FileText },
+  { to: '/history', label: 'History', icon: HistoryIcon },
   { to: '/apply', label: 'New Application', icon: PlusCircle },
   { to: '/risk-analysis', label: 'Risk Analysis', icon: ShieldCheck },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },

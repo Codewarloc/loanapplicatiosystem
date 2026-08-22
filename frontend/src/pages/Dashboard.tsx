@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -31,16 +31,8 @@ import {
 import StatCard from '@/components/ui/StatCard';
 import ChartCard from '@/components/ui/ChartCard';
 import LoanTable from '@/components/LoanTable';
-import {
-  getDashboardStats,
-  getApplicationsOverTime,
-  getApprovalVsRejection,
-  getRiskDistribution,
-  getLoanAmountDistribution,
-  getMonthlyLoanVolume,
-  applications,
-} from '@/data/mockData';
 import { formatNaira } from '@/utils/format';
+import { getDashboardData, type DashboardData } from '@/services/loanService';
 
 const tooltipStyle = {
   backgroundColor: '#0d1019',
@@ -51,13 +43,24 @@ const tooltipStyle = {
 };
 
 export default function Dashboard() {
-  const stats = getDashboardStats();
-  const overTime = getApplicationsOverTime();
-  const approvalRejection = getApprovalVsRejection();
-  const riskDist = getRiskDistribution();
-  const amountDist = getLoanAmountDistribution();
-  const monthlyVolume = getMonthlyLoanVolume();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    getDashboardData().then(setData).catch((reason: unknown) => {
+      setError(reason instanceof Error ? reason.message : 'Unable to load dashboard data.');
+    });
+  }, []);
+
+  if (error) {
+    return <div className="glass p-8 text-center text-sm text-rose-300">{error}</div>;
+  }
+  if (!data) {
+    return <div className="glass p-8 text-center text-sm text-slate-400">Loading dashboard data...</div>;
+  }
+
+  const { stats, overTime, approvalRejection, riskDistribution: riskDist, amountDistribution: amountDist, monthlyVolume, applications } = data;
 
   return (
     <div className="space-y-6">
@@ -169,7 +172,7 @@ export default function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
               <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
               <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v / 1000000}M`} />
-              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(255,255,255,0.03)' }} formatter={(v: number) => formatNaira(v, true)} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(255,255,255,0.03)' }} formatter={(value) => formatNaira(Number(value ?? 0), true)} />
               <Bar dataKey="volume" fill="url(#volGrad)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -180,7 +183,7 @@ export default function Dashboard() {
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Recent Applications</h2>
-          <Link to="/applications" className="flex items-center gap-1 text-sm text-brand-400 hover:text-brand-300">
+          <Link to="/history" className="flex items-center gap-1 text-sm text-brand-400 hover:text-brand-300">
             View all <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

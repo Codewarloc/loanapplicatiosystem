@@ -3,21 +3,28 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, TrendingUp, Zap, Home } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
+import { login } from '@/services/authService';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await login(email, password);
       addToast({ type: 'success', title: 'Welcome back!', message: 'Signed in successfully.' });
       navigate('/dashboard');
-    }, 1200);
+    } catch (error) {
+      addToast({ type: 'error', title: 'Sign in failed', message: error instanceof Error ? error.message : 'Please try again.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -90,7 +97,8 @@ export default function Login() {
                   <input
                     type="email"
                     required
-                    defaultValue="adaeze.okeke@lendai.com"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                     className="input-base pl-10"
                     placeholder="you@company.com"
                   />
@@ -106,7 +114,8 @@ export default function Login() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    defaultValue="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
                     className="input-base pl-10 pr-10"
                     placeholder="••••••••"
                   />
@@ -142,9 +151,6 @@ export default function Login() {
               <Link to="/signup" className="font-medium text-brand-400 hover:text-brand-300">Create account</Link>
             </p>
           </div>
-          <p className="mt-6 text-center text-xs text-slate-600">
-            Demo mode — any credentials will sign you in.
-          </p>
         </motion.div>
       </div>
     </div>

@@ -16,6 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { ProgressRing } from '@/components/ui/ProgressRing';
+import { isAuthenticated } from '@/services/authService';
 
 const features = [
   { icon: Brain, title: 'AI-Powered Analysis', desc: 'Advanced ML models evaluate applicant data in seconds, not days.' },
@@ -51,6 +52,8 @@ const securityFeatures = [
 ];
 
 export default function Landing() {
+  const authenticated = isAuthenticated();
+
   return (
     <div className="min-h-screen bg-ink-950">
       {/* Nav */}
@@ -71,9 +74,15 @@ export default function Landing() {
             <a href="#security" className="text-sm text-slate-400 hover:text-white transition">Security</a>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/login" className="hidden text-sm font-medium text-slate-300 hover:text-white sm:block">Sign In</Link>
-            <Link to="/signup" className="hidden text-sm font-medium text-slate-300 hover:text-white sm:block">Create Account</Link>
-            <Link to="/dashboard" className="btn-primary text-sm">Get Started <ArrowRight className="h-4 w-4" /></Link>
+            {!authenticated && (
+              <>
+                <Link to="/login" className="hidden text-sm font-medium text-slate-300 hover:text-white sm:block">Sign In</Link>
+                <Link to="/signup" className="hidden text-sm font-medium text-slate-300 hover:text-white sm:block">Create Account</Link>
+              </>
+            )}
+            <Link to={authenticated ? '/dashboard' : '/signup'} className="btn-primary text-sm">
+              {authenticated ? 'Open Dashboard' : 'Get Started'} <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </nav>
@@ -103,8 +112,8 @@ export default function Landing() {
                 <Link to="/apply" className="btn-primary">
                   Start New Application <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link to="/signup" className="btn-ghost">
-                  <BarChart3 className="h-4 w-4" /> Create Account
+                <Link to={authenticated ? '/dashboard' : '/signup'} className="btn-ghost">
+                  <BarChart3 className="h-4 w-4" /> {authenticated ? 'Open Dashboard' : 'Create Account'}
                 </Link>
               </div>
               <div className="mt-10 flex items-center gap-6 text-sm text-slate-500">

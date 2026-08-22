@@ -4,22 +4,9 @@ import type {
   RiskLevel,
   RiskFactor,
 } from '@/types';
+import { classifyLoan, type LoanAnalysisInput } from './loanService';
 
-export interface LoanAnalysisInput {
-  age: number;
-  monthly_income: number;
-  monthly_expenses: number;
-  existing_debt: number;
-  credit_score: number;
-  previous_loans: number;
-  loans_repaid: number;
-  loans_defaulted: number;
-  requested_loan_amount: number;
-  loan_term_months: number;
-  monthly_debt_payment?: number;
-  savings_balance?: number;
-  employment_years?: number;
-}
+export type { LoanAnalysisInput } from './loanService';
 
 export interface LoanAnalysisResponse {
   decision: LoanDecision;
@@ -31,24 +18,19 @@ export interface LoanAnalysisResponse {
   explanation: string;
 }
 
-const API_BASE_URL = '/api';
-
 export async function analyzeLoanApplication(
   input: LoanAnalysisInput
 ): Promise<LoanAnalysisResponse> {
-  if (import.meta.env.VITE_AI_API_ENABLED === 'true') {
-    const response = await fetch(`${API_BASE_URL}/loan/analyze/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
-    });
-    if (!response.ok) {
-      throw new Error(`AI analysis failed: ${response.statusText}`);
-    }
-    return (await response.json()) as LoanAnalysisResponse;
-  }
-  await new Promise((r) => setTimeout(r, 1800));
-  return mockAnalyze(input);
+  const result = await classifyLoan(input);
+  return {
+    decision: result.decision,
+    risk_level: result.risk_level,
+    risk_score: result.risk_score,
+    confidence: result.confidence,
+    recommended_amount: result.recommended_amount,
+    recommended_term: result.recommended_term,
+    explanation: result.explanation,
+  };
 }
 
 export async function getRiskScore(input: LoanAnalysisInput): Promise<number> {
@@ -67,7 +49,16 @@ export async function getFullAnalysis(
   applicationId: string,
   input: LoanAnalysisInput
 ): Promise<AIAnalysisResult> {
-  const base = await analyzeLoanApplication(input);
+  const result = await classifyLoan(input);
+  const base: LoanAnalysisResponse = {
+    decision: result.decision,
+    risk_level: result.risk_level,
+    risk_score: result.risk_score,
+    confidence: result.confidence,
+    recommended_amount: result.recommended_amount,
+    recommended_term: result.recommended_term,
+    explanation: result.explanation,
+  };
   const dti =
     input.monthly_debt_payment && input.monthly_income > 0
       ? (input.monthly_debt_payment / input.monthly_income) * 100
@@ -109,69 +100,14 @@ export async function getFullAnalysis(
     recommendedAmount: base.recommended_amount,
     recommendedTerm: base.recommended_term,
     explanation: base.explanation,
-    positiveFactors,
-    riskFactors: riskFactors,
+    positiveFactors: result.positive_factors.length ? result.positive_factors : positiveFactors,
+    riskFactors: result.risk_factors.length ? result.risk_factors : riskFactors,
     breakdown,
-    riskFactorDetails: riskFactorList,
-  };
-}
-
-function mockAnalyze(input: LoanAnalysisInput): LoanAnalysisResponse {
-  let score = 50;
-  if (input.credit_score >= 750) score -= 30;
-  else if (input.credit_score >= 700) score -= 22;
-  else if (input.credit_score >= 650) score -= 12;
-  else if (input.credit_score < 580) score += 25;
-
-  const dti =
-    input.monthly_debt_payment && input.monthly_income > 0
-      ? (input.monthly_debt_payment / input.monthly_income) * 100
-      : 0;
-  if (dti < 15) score -= 15;
-  else if (dti < 30) score -= 5;
-  else if (dti > 40) score += 20;
-
-  if (input.loans_defaulted === 0) score -= 8;
-  else score += input.loans_defaulted * 12;
-
-  if ((input.employment_years ?? 0) >= 5) score -= 8;
-  if ((input.employment_years ?? 0) < 2) score += 10;
-
-  if ((input.savings_balance ?? 0) > 2000000) score -= 6;
-
-  if (input.requested_loan_amount > 10000000) score += 10;
-  if (input.requested_loan_amount < 3000000) score -= 4;
-
-  score = Math.max(5, Math.min(95, score));
-
-  let riskLevel: RiskLevel = 'MEDIUM';
-  if (score < 35) riskLevel = 'LOW';
-  else if (score > 65) riskLevel = 'HIGH';
-
-  let decision: LoanDecision = 'APPROVED';
-  if (score > 65) decision = 'REJECTED';
-  else if (score > 45) decision = 'REVIEW';
-
-  const confidence = Math.round((95 - score * 0.3 + Math.random() * 3) * 10) / 10;
-  const recommendedAmount =
-    decision === 'REJECTED'
-      ? 0
-      : score < 35
-        ? input.requested_loan_amount
-        : Math.round(input.requested_loan_amount * (1 - score / 200));
-
-  return {
-    decision,
-    risk_level: riskLevel,
-    risk_score: Math.round(score),
-    confidence,
-    recommended_amount: recommendedAmount,
-    recommended_term: input.loan_term_months,
-    explanation:
-      decision === 'APPROVED'
-        ? 'Strong repayment capacity, healthy credit history, low debt-to-income ratio and sufficient savings contributed positively to the classification.'
-        : decision === 'REJECTED'
-          ? 'Elevated debt-to-income ratio, weak credit profile and insufficient repayment capacity indicate high risk of default.'
-          : 'Mixed risk indicators require manual review before a final decision can be issued.',
+    riskFactorDetails: result.risk_factor_details.map((factor) => ({
+      label: factor.label ?? factor.feature,
+      score: factor.impact === 'positive' ? 80 : factor.impact === 'negative' ? 30 : 50,
+      impact: factor.impact,
+      description: `${factor.feature}: ${String(factor.value)}`,
+    })),
   };
 }
